@@ -1,0 +1,253 @@
+import os
+import logging
+import random
+from datetime import datetime, timezone
+
+from telegram import Update
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+)
+
+# =========================
+# CONFIG
+# =========================
+
+BOT_TOKEN = "os.getenv(8500971116:AAHD-tN0ItwABPjczQ0BH8GL2vpIcN7xviY")
+
+if not BOT_TOKEN:
+    raise RuntimeError("8500971116:AAHD-tN0ItwABPjczQ0BH8GL2vpIcN7xviY")
+
+BOT_NAME = "Waseemsial AI Bot"
+
+# Demo assets
+ASSETS = [
+    "EUR/USD",
+    "GBP/USD",
+    "USD/JPY",
+    "AUD/USD",
+    "EUR/JPY",
+]
+
+# =========================
+# LOGGING
+# =========================
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+
+logger = logging.getLogger(__name__)
+
+
+# =========================
+# AI / SIGNAL ENGINE
+# =========================
+
+def generate_signal():
+    """
+    Demo signal engine.
+
+    IMPORTANT:
+    This is NOT a real market prediction model.
+    Replace this function later with real candle/market-data analysis.
+    """
+
+    asset = random.choice(ASSETS)
+
+    direction = random.choice([
+        "CALL 🟢",
+        "PUT 🔴",
+        "NO TRADE ⚪",
+    ])
+
+    if direction == "NO TRADE ⚪":
+        confidence = random.randint(40, 59)
+    else:
+        confidence = random.randint(70, 92)
+
+    expiry = random.choice([
+        "1 minute",
+        "2 minutes",
+        "3 minutes",
+    ])
+
+    reasons = [
+        "EMA trend analysis",
+        "RSI momentum",
+        "MACD momentum",
+        "Bollinger Band analysis",
+        "Price action",
+    ]
+
+    reason = random.choice(reasons)
+
+    return {
+        "asset": asset,
+        "direction": direction,
+        "confidence": confidence,
+        "expiry": expiry,
+        "reason": reason,
+    }
+
+
+# =========================
+# /START
+# =========================
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    user = update.effective_user
+
+    message = (
+        f"🤖 *{BOT_NAME}*\n\n"
+        f"Welcome, {user.first_name}!\n\n"
+        "📊 AI Trading Signal Bot\n\n"
+        "Available commands:\n"
+        "🔹 /signal - Get a trading signal\n"
+        "🔹 /help - Show help\n"
+        "🔹 /about - About the bot\n\n"
+        "⚠️ Signals are for educational/demo purposes. "
+        "They are not guaranteed predictions."
+    )
+
+    await update.message.reply_text(
+        message,
+        parse_mode="Markdown"
+    )
+
+
+# =========================
+# /SIGNAL
+# =========================
+
+async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text(
+        "🔎 Analyzing market conditions..."
+    )
+
+    data = generate_signal()
+
+    now = datetime.now(timezone.utc).strftime(
+        "%Y-%m-%d %H:%M UTC"
+    )
+
+    message = (
+        f"🤖 *{BOT_NAME}*\n\n"
+        f"📊 *NEW SIGNAL*\n\n"
+        f"💱 Asset: `{data['asset']}`\n"
+        f"📌 Direction: *{data['direction']}*\n"
+        f"⏱ Expiry: `{data['expiry']}`\n"
+        f"🎯 Confidence: *{data['confidence']}%*\n"
+        f"🧠 Analysis: `{data['reason']}`\n"
+        f"🕐 Time: `{now}`\n\n"
+        "⚠️ *Demo signal only.*\n"
+        "Do not risk real money based only on this signal."
+    )
+
+    await update.message.reply_text(
+        message,
+        parse_mode="Markdown"
+    )
+
+
+# =========================
+# /HELP
+# =========================
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    message = (
+        f"🤖 *{BOT_NAME} Help*\n\n"
+        "/start - Start the bot\n"
+        "/signal - Generate a demo signal\n"
+        "/about - Bot information\n"
+        "/help - Show this help\n\n"
+        "📌 The current version uses a demo signal engine."
+    )
+
+    await update.message.reply_text(
+        message,
+        parse_mode="Markdown"
+    )
+
+
+# =========================
+# /ABOUT
+# =========================
+
+async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    message = (
+        f"🤖 *{BOT_NAME}*\n\n"
+        "Version: 1.0\n"
+        "Platform: Telegram\n"
+        "Mode: Demo / Signal Only\n\n"
+        "The bot is designed to provide trading-analysis "
+        "signals for educational testing.\n\n"
+        "⚠️ No automatic real-money trades are placed."
+    )
+
+    await update.message.reply_text(
+        message,
+        parse_mode="Markdown"
+    )
+
+
+# =========================
+# ERROR HANDLER
+# =========================
+
+async def error_handler(
+    update: object,
+    context: ContextTypes.DEFAULT_TYPE
+):
+
+    logger.error(
+        "Exception while handling update:",
+        exc_info=context.error
+    )
+
+
+# =========================
+# MAIN
+# =========================
+
+def main():
+
+    application = (
+        Application.builder()
+        .token(BOT_TOKEN)
+        .build()
+    )
+
+    application.add_handler(
+        CommandHandler("start", start)
+    )
+
+    application.add_handler(
+        CommandHandler("signal", signal)
+    )
+
+    application.add_handler(
+        CommandHandler("help", help_command)
+    )
+
+    application.add_handler(
+        CommandHandler("about", about)
+    )
+
+    application.add_error_handler(
+        error_handler
+    )
+
+    print(f"{BOT_NAME} is running...")
+
+    application.run_polling()
+
+
+if __name__ == "__main__":
+    main()
