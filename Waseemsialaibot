@@ -14,10 +14,10 @@ from telegram.ext import (
 # CONFIG
 # =========================
 
-BOT_TOKEN = "os.getenv(8500971116:AAHD-tN0ItwABPjczQ0BH8GL2vpIcN7xviY")
+BOT_TOKEN = "os.getenv(8931043529:AAFm74EftHvs6Ik00oifMyo5nA3FaE_QM6g")
 
 if not BOT_TOKEN:
-    raise RuntimeError("8500971116:AAHD-tN0ItwABPjczQ0BH8GL2vpIcN7xviY")
+    raise RuntimeError("8931043529:AAFm74EftHvs6Ik00oifMyo5nA3FaE_QM6g")
 
 BOT_NAME = "Waseemsial AI Bot"
 
